@@ -12,7 +12,9 @@ import (
 	"github.com/minio/minio-go/v7/pkg/credentials"
 )
 
-type MinioType struct{ minioClient *minio.Client }
+type MinioType struct {
+	minioClient *minio.Client
+}
 
 func Minio() *MinioType {
 	return &MinioType{}
@@ -34,16 +36,14 @@ func (s3 *MinioType) Connect() {
 	if err != nil {
 		log.Fatalln(err)
 	}
-	log.Println("Connected to MinIO!")
 }
 
 func (s3 *MinioType) Upload(bucketName, objectName string, reader io.Reader, fileSize int64) error {
 	// Upload the file
-	n, err := s3.minioClient.PutObject(context.Background(), bucketName, objectName, reader, fileSize, minio.PutObjectOptions{})
+	_, err := s3.minioClient.PutObject(context.Background(), bucketName, objectName, reader, fileSize, minio.PutObjectOptions{})
 	if err != nil {
 		return err
 	}
-	log.Printf("Uploaded %s of size %d", objectName, n)
 	return nil
 }
 
@@ -74,7 +74,6 @@ func (s3 *MinioType) List(bucketName, prefix string, recursive bool) ([]minio.Ob
 	var objects []minio.ObjectInfo
 	for object := range objectsCh {
 		if object.Err != nil {
-			log.Printf("Error listing object: %v", object.Err)
 			return nil, object.Err
 		}
 		objects = append(objects, object)
@@ -89,7 +88,6 @@ func (s3 *MinioType) Delete(bucketName, objectName string) error {
 	if err != nil {
 		return err
 	}
-	log.Printf("Deleted object %s from bucket %s", objectName, bucketName)
 	return nil
 }
 
@@ -104,7 +102,6 @@ func (s3 *MinioType) Share(bucketName, objectName string, expiry time.Duration) 
 		return "", err
 	}
 
-	log.Printf("Generated presigned URL for object %s in bucket %s", objectName, bucketName)
 	return presignedURL.String(), nil
 }
 
@@ -131,6 +128,5 @@ func (s3 *MinioType) Rename(bucketName, oldName, newName string) error {
 		return err
 	}
 
-	log.Printf("Renamed object from %s to %s in bucket %s", oldName, newName, bucketName)
 	return nil
 }
