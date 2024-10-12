@@ -1,6 +1,8 @@
 package services
 
 import (
+	"context"
+	"go-sample/models"
 	"go-sample/repositories"
 
 	"go.mongodb.org/mongo-driver/mongo"
@@ -14,4 +16,9 @@ func UserService(collection *mongo.Collection) *UserServiceType {
 	return &UserServiceType{
 		Repo: repositories.UserRepository(collection),
 	}
+}
+
+func (service *UserServiceType) CreateUser(user models.User) error {
+	_, err := service.Repo.Collection.InsertOne(context.Background(), user)
+	return err
 }

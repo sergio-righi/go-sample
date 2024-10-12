@@ -11,6 +11,7 @@ import (
 func InitRoutes(
 	authController *controllers.AuthControllerType,
 	s3Controller *controllers.S3ControllerType,
+	personController *controllers.PersonControllerType,
 	userController *controllers.UserControllerType) *mux.Router {
 	router := mux.NewRouter()
 
@@ -18,9 +19,15 @@ func InitRoutes(
 
 	// Define protected routes
 
+	// person routes
+	router.Handle("/people", jwt.Handler(http.HandlerFunc(personController.Base.All))).Methods("GET")
+	router.Handle("/people", jwt.Handler(http.HandlerFunc(personController.Base.Create))).Methods("POST")
+	router.Handle("/people/{id}", jwt.Handler(http.HandlerFunc(personController.Base.Find))).Methods("GET")
+	router.Handle("/people/{id}", jwt.Handler(http.HandlerFunc(personController.Base.Update))).Methods("PUT")
+	router.Handle("/people/{id}", jwt.Handler(http.HandlerFunc(personController.Base.Delete))).Methods("DELETE")
+
 	// user routes
 	router.Handle("/users", jwt.Handler(http.HandlerFunc(userController.Base.All))).Methods("GET")
-	router.Handle("/users", jwt.Handler(http.HandlerFunc(userController.Base.Create))).Methods("POST")
 	router.Handle("/users/{id}", jwt.Handler(http.HandlerFunc(userController.Base.Find))).Methods("GET")
 	router.Handle("/users/{id}", jwt.Handler(http.HandlerFunc(userController.Base.Update))).Methods("PUT")
 	router.Handle("/users/{id}", jwt.Handler(http.HandlerFunc(userController.Base.Delete))).Methods("DELETE")
@@ -35,6 +42,7 @@ func InitRoutes(
 
 	// Define public routes
 	router.HandleFunc("/login", authController.Login).Methods("POST")
+	router.HandleFunc("/users", userController.Create).Methods("POST")
 
 	return router
 }

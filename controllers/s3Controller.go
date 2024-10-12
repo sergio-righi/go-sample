@@ -62,8 +62,9 @@ func (s3 *S3ControllerType) Get(w http.ResponseWriter, r *http.Request) {
 func (s3 *S3ControllerType) List(w http.ResponseWriter, r *http.Request) {
 	bucketName := mux.Vars(r)["bucket"]
 	prefix := r.URL.Query().Get("prefix")
+	recursive := r.URL.Query().Get("recursive") == "true"
 
-	files, err := s3.Service.List(bucketName, prefix)
+	files, err := s3.Service.List(bucketName, prefix, recursive)
 	if err != nil {
 		s3.ErrorResponse(w, "Failed to list files", http.StatusInternalServerError)
 		return

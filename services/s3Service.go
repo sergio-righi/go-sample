@@ -36,8 +36,8 @@ func (s3 *S3ServiceType) Get(bucketName, objectName string) (io.ReadSeekCloser, 
 	return reader, nil
 }
 
-func (s3 *S3ServiceType) List(bucketName, prefix string) ([]string, error) {
-	objects, err := s3.MinIO.List(bucketName, prefix, true)
+func (s3 *S3ServiceType) List(bucketName, prefix string, recursive bool) ([]string, error) {
+	objects, err := s3.MinIO.List(bucketName, prefix, recursive)
 	if err != nil {
 		log.Printf("Failed to list files: %v", err)
 		return nil, err

@@ -27,12 +27,13 @@ func main() {
 	// Connect to MinIO
 	minio.Connect()
 
-	authController := controllers.AuthController()
 	s3Controller := controllers.S3Controller(minio)
+	authController := controllers.AuthController(mongo.GetCollection("users"))
+	personController := controllers.PersonController(mongo.GetCollection("people"))
 	userController := controllers.UserController(mongo.GetCollection("users"))
 
-	router := routes.InitRoutes(authController, s3Controller, userController)
+	router := routes.InitRoutes(authController, s3Controller, personController, userController)
 
 	fmt.Println("Server is running on http://localhost:8080")
-	http.ListenAndServe(":8080", router)
+	http.ListenAndServe("localhost:8080", router)
 }
