@@ -41,7 +41,7 @@ func InitRoutes(
 	router.Handle("/s3/rename/{bucket}/{object}", jwt.Handler(http.HandlerFunc(s3Controller.Rename))).Methods("PUT")
 
 	// Define public routes
-	router.HandleFunc("/login", authController.Login).Methods("POST")
+	router.HandleFunc("/auth", authController.Auth).Methods("POST")
 	router.HandleFunc("/users", userController.Create).Methods("POST")
 
 	return router

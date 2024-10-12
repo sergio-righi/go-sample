@@ -39,11 +39,10 @@ func (controller *UserControllerType) Create(w http.ResponseWriter, r *http.Requ
 
 	// Call the user service to create the user
 	if err := controller.Base.Service.Create(user); err != nil {
-		http.Error(w, "Could not create user: "+err.Error(), http.StatusInternalServerError)
+		controller.Base.JsonResponse(w, r, map[string]string{"error": "Could not create user: " + err.Error()}, http.StatusInternalServerError)
 		return
 	}
 
-	// Respond with success
-	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(user)
+	// Respond with success using JsonResponse
+	controller.Base.JsonResponse(w, r, user, http.StatusCreated)
 }

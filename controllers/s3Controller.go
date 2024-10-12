@@ -39,7 +39,7 @@ func (s3 *S3ControllerType) Upload(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	s3.JsonResponse(w, map[string]string{"message": "File uploaded successfully"}, http.StatusCreated)
+	s3.JsonResponse(w, r, map[string]string{"message": "File uploaded successfully"}, http.StatusCreated)
 }
 
 // GetFile handles the file retrieval request
@@ -70,7 +70,7 @@ func (s3 *S3ControllerType) List(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	s3.JsonResponse(w, files, http.StatusOK)
+	s3.JsonResponse(w, r, files, http.StatusOK)
 }
 
 // DeleteFile handles the file deletion request
@@ -84,7 +84,7 @@ func (s3 *S3ControllerType) Delete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	s3.JsonResponse(w, map[string]string{"message": "File deleted successfully"}, http.StatusNoContent)
+	s3.JsonResponse(w, r, map[string]string{"message": "File deleted successfully"}, http.StatusNoContent)
 }
 
 // ShareFile handles the request to generate a presigned URL for sharing a file
@@ -99,7 +99,7 @@ func (s3 *S3ControllerType) Share(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	s3.JsonResponse(w, map[string]string{"url": url}, http.StatusOK)
+	s3.JsonResponse(w, r, map[string]string{"url": url}, http.StatusOK)
 }
 
 // RenameFile handles renaming an object in S3
@@ -114,5 +114,5 @@ func (s3 *S3ControllerType) Rename(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	s3.JsonResponse(w, map[string]string{"message": "File renamed successfully"}, http.StatusOK)
+	s3.JsonResponse(w, r, map[string]string{"message": "File renamed successfully"}, http.StatusOK)
 }

@@ -3,36 +3,29 @@ package controllers
 import (
 	"encoding/json"
 	"net/http"
-	"os"
-	"time"
 
 	"go-sample/models"
 	"go-sample/services"
+	"go-sample/utils"
 
-	"github.com/dgrijalva/jwt-go"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"golang.org/x/crypto/bcrypt"
 )
 
-type Claims struct {
-	Username string `json:"username"`
-	jwt.StandardClaims
-}
-
 type AuthControllerType struct {
-	JwtSecretKey string
-	Base         *BaseControllerType[models.User, services.UserServiceType]
+	JwtUtils *utils.JwtUtilsType
+	Base     *BaseControllerType[models.User, services.UserServiceType]
 }
 
 func AuthController(collection *mongo.Collection) *AuthControllerType {
 	return &AuthControllerType{
-		JwtSecretKey: os.Getenv("JWT_SECRET_KEY"),
-		Base:         BaseController[models.User](collection, services.UserService(collection)),
+		Base:     BaseController[models.User](collection, services.UserService(collection)),
+		JwtUtils: utils.JwtUtils(),
 	}
 }
 
-func (auth *AuthControllerType) Login(w http.ResponseWriter, r *http.Request) {
+func (auth *AuthControllerType) Auth(w http.ResponseWriter, r *http.Request) {
 	var creds models.Credentials
 	err := json.NewDecoder(r.Body).Decode(&creds)
 	if err != nil {
@@ -59,27 +52,14 @@ func (auth *AuthControllerType) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Create JWT token (same as before)
-	expirationTime := time.Now().Add(5 * time.Minute)
-	claims := &Claims{
-		Username: creds.Username,
-		StandardClaims: jwt.StandardClaims{
-			ExpiresAt: expirationTime.Unix(),
-		},
-	}
-
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	tokenString, err := token.SignedString([]byte(auth.JwtSecretKey))
+	// Generate a new token
+	claims := &models.Claims{}
+	tokenString, err := auth.JwtUtils.Generate(w, claims)
 	if err != nil {
-		http.Error(w, "Could not create token", http.StatusInternalServerError)
+		http.Error(w, "Could not generate token", http.StatusInternalServerError)
 		return
 	}
 
-	http.SetCookie(w, &http.Cookie{
-		Name:    "token",
-		Value:   tokenString,
-		Expires: expirationTime,
-	})
-
-	json.NewEncoder(w).Encode(map[string]string{"token": tokenString})
+	// Respond with the new token
+	auth.Base.HttpControllerType.JsonResponse(w, r, tokenString, http.StatusOK)
 }

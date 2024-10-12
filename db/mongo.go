@@ -35,8 +35,6 @@ func (db *MongoDBType) Connect() {
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	log.Println("Connected to MongoDB!")
 }
 
 func (db *MongoDBType) GetCollection(collection string) *mongo.Collection {
