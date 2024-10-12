@@ -18,7 +18,7 @@ func UserService(collection *mongo.Collection) *UserServiceType {
 	}
 }
 
-func (service *UserServiceType) CreateUser(user models.User) error {
+func (service *UserServiceType) Create(user models.User) error {
 	_, err := service.Repo.Collection.InsertOne(context.Background(), user)
 	return err
 }

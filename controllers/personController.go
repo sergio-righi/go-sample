@@ -12,9 +12,7 @@ type PersonControllerType struct {
 }
 
 func PersonController(collection *mongo.Collection) *PersonControllerType {
-
-	personService := services.PersonService(collection)
 	return &PersonControllerType{
-		Base: BaseController[models.Person](collection, personService),
+		Base: BaseController[models.Person](collection, services.PersonService(collection)),
 	}
 }

@@ -26,10 +26,9 @@ type AuthControllerType struct {
 }
 
 func AuthController(collection *mongo.Collection) *AuthControllerType {
-	userService := services.UserService(collection)
 	return &AuthControllerType{
 		JwtSecretKey: os.Getenv("JWT_SECRET_KEY"),
-		Base:         BaseController[models.User](collection, userService),
+		Base:         BaseController[models.User](collection, services.UserService(collection)),
 	}
 }
 

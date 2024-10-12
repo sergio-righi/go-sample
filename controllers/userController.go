@@ -15,9 +15,8 @@ type UserControllerType struct {
 }
 
 func UserController(collection *mongo.Collection) *UserControllerType {
-	userService := services.UserService(collection)
 	return &UserControllerType{
-		Base: BaseController[models.User](collection, userService),
+		Base: BaseController[models.User](collection, services.UserService(collection)),
 	}
 }
 
@@ -39,7 +38,7 @@ func (controller *UserControllerType) Create(w http.ResponseWriter, r *http.Requ
 	user.Password = string(hashedPassword) // Replace plain password with hashed password
 
 	// Call the user service to create the user
-	if err := controller.Base.Service.CreateUser(user); err != nil {
+	if err := controller.Base.Service.Create(user); err != nil {
 		http.Error(w, "Could not create user: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
