@@ -24,6 +24,15 @@ func (hc *HttpControllerType) FromHex(id string) (primitive.ObjectID, error) {
 	return objectID, nil
 }
 
+func (hc *HttpControllerType) ToObjectId(w http.ResponseWriter, r *http.Request, id string) primitive.ObjectID {
+	objectID, err := hc.FromHex(id)
+	if err != nil {
+		hc.ErrorResponse(w, "Invalid ID format", http.StatusBadRequest)
+		return primitive.ObjectID{}
+	}
+	return objectID
+}
+
 // jsonResponse to send JSON responses
 func (hc *HttpControllerType) JsonResponse(w http.ResponseWriter, r *http.Request, data interface{}, status int) {
 	// Check if a refreshed token exists in the request context

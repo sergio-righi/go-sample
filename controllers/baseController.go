@@ -58,16 +58,10 @@ func (bc *BaseControllerType[T, S]) Create(w http.ResponseWriter, r *http.Reques
 
 func (bc *BaseControllerType[T, S]) Find(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
-	id := params["id"] // Extract the ID from the URL
-
-	objectID, err := bc.FromHex(id)
-	if err != nil {
-		bc.ErrorResponse(w, "Invalid ID format", http.StatusBadRequest)
-		return
-	}
+	id := bc.ToObjectId(w, r, params["id"]) // Extract the ID from the URL
 
 	var result T
-	err = bc.Model.FindOne(r.Context(), bson.M{"_id": objectID}).Decode(&result)
+	var err = bc.Model.FindOne(r.Context(), bson.M{"_id": id}).Decode(&result)
 	if err != nil {
 		bc.ErrorResponse(w, "Document not found", http.StatusNotFound)
 		return
@@ -78,13 +72,7 @@ func (bc *BaseControllerType[T, S]) Find(w http.ResponseWriter, r *http.Request)
 
 func (bc *BaseControllerType[T, S]) Update(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
-	id := params["id"] // Extract the ID from the URL
-
-	objectID, err := bc.FromHex(id)
-	if err != nil {
-		bc.ErrorResponse(w, "Invalid ID format", http.StatusBadRequest)
-		return
-	}
+	id := bc.ToObjectId(w, r, params["id"]) // Extract the ID from the URL
 
 	var doc T
 	if err := json.NewDecoder(r.Body).Decode(&doc); err != nil {
@@ -92,8 +80,9 @@ func (bc *BaseControllerType[T, S]) Update(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
+	var err error
 	// Update the document
-	_, err = bc.Model.UpdateOne(r.Context(), bson.M{"_id": objectID}, bson.M{"$set": doc})
+	_, err = bc.Model.UpdateOne(r.Context(), bson.M{"_id": id}, bson.M{"$set": doc})
 	if err != nil {
 		bc.ErrorResponse(w, "Failed to update document", http.StatusInternalServerError)
 		return
@@ -104,19 +93,14 @@ func (bc *BaseControllerType[T, S]) Update(w http.ResponseWriter, r *http.Reques
 
 func (bc *BaseControllerType[T, S]) Delete(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
-	id := params["id"] // Extract the ID from the URL
+	id := bc.ToObjectId(w, r, params["id"]) // Extract the ID from the URL
 
-	objectID, err := bc.FromHex(id)
-	if err != nil {
-		bc.ErrorResponse(w, "Invalid ID format", http.StatusBadRequest)
-		return
-	}
-
-	_, err = bc.Model.DeleteOne(r.Context(), bson.M{"_id": objectID})
+	var err error
+	_, err = bc.Model.DeleteOne(r.Context(), bson.M{"_id": id})
 	if err != nil {
 		bc.ErrorResponse(w, "Failed to delete document", http.StatusInternalServerError)
 		return
 	}
 
-	w.WriteHeader(http.StatusNoContent) // 204 No Content
+	bc.JsonResponse(w, r, nil, http.StatusOK)
 }
